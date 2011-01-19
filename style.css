@@ -1,0 +1,12 @@
+div.event {
+  background-color: grey;
+  height: 20px;
+  margin-top: 4px;
+  display: inline-block;
+  clear: right;
+  
+}
+div.sidebar_title {
+  display: inline-block;
+  clear: left;
+}

@@ -2,7 +2,7 @@
 
 class EZGantt {
 
-	private $title, $start_date, $end_date, $width, $safeTitle;
+	private $title, $start_date, $end_date, $width, $safeTitle, $duration, $sidebar_width = 100;
 
 	private $events = array();
 
@@ -38,9 +38,10 @@ class EZGantt {
 				'title'	=> $category,
 				'items'	=> array(
 								array(
-									'name'	=> $name,
-									'start'	=> $start_date,
-									'end'	=> $end_date
+									'name'		=> $name,
+									'start'		=> $start_date,
+									'end'		=> $end_date,
+									'duration'	=> $this->_get_duration_in_days($start_date, $end_date) 
 								)
 							)
 			);
@@ -48,9 +49,10 @@ class EZGantt {
 		else
 		{
 			$this->events[$found]['items'][] = array(
-					'name'	=> $name,
-					'start'	=> $start_date,
-					'end'	=> $end_date
+					'name'      => $name,
+					'start'     => $start_date,
+					'end'       => $end_date,
+                                        'duration'  => $this->_get_duration_in_days($start_date, $end_date)
 					);
 		}
 		
@@ -118,7 +120,10 @@ class EZGantt {
 	}
 	
 	public function setStartDate($start_date){
-	  $this->start_date = $start_date;
+	  $this->start_date = $this->_convert_date($start_date);
+	  if(isset($this->end_date)){
+	    $this->duration = $this->getEndDate() - $this->getStartDate();
+	  }
 	}
 	
 	public function getEndDate(){
@@ -126,7 +131,18 @@ class EZGantt {
 	}
 	
 	public function setEndDate($end_date){
-	  $this->end_date = $end_date;
+	  $this->end_date = $this->_convert_date($end_date);
+	  if(isset($this->start_date)){
+	    $this->duration = $this->end_date - $this->start_date;
+	  }
+	}
+	
+	public function getDuration(){
+	  return $this->duration; // Add another day?
+	}
+	
+	public function getDurationInDays(){
+	  return $this->duration / 60 / 60 / 24 + 1;
 	}
 	
 	public function getWidth(){
@@ -142,16 +158,33 @@ class EZGantt {
 		return strtotime($date);
 	}
 	
+	private function _get_duration_in_days($start, $end){
+	  return ($end - $start) / 60 / 60 / 24 + 1;
+	}
+	
 	public function render()
 	{
-		$html = 'TEST';
-		$this->_layout($html);
-		echo $html;
+		$html = '';
+                foreach($this->events as $event_category){
+                    $html .= '<h3>' . $event_category['title'] . '</h3>';
+                    foreach($event_category['items'] as $item){
+                        $html .= $this->_addEventLine($item['name'], $item['start'], $item['duration']);
+                    }
+                }
 		
-		return $this->events;
+		$this->_layout($html);
+		return $html;
 	}
 	
 	private function _layout(&$html){
 		$html = '<div id="ezgantt_' . $this->getSafeTitle() . '" style="width: ' . $this->getWidth() . 'px;"><h2 style="text-align: center; width: 100%;">' . $this->getTitle() . '</h2>' . $html . '</div>';		
+	}
+	
+	private function _addEventLine($title, $start, $duration){
+	  $width_factor = ($this->getWidth()-$this->sidebar_width);
+          $margin = (($this->_get_duration_in_days($this->getStartDate(), $start) - 1) / floatVal($this->getDurationInDays()))*$width_factor;
+	  $width = ($duration / floatVal($this->getDurationInDays()))*$width_factor;
+	  $html = '<div class="ezgantt_row"><div class="sidebar_title" style="width:' . $this->sidebar_width . 'px;">' . $title . '</div><div class="event" style="margin-left:' . $margin . 'px; width:' . $width . 'px;"></div></div>';
+	  return $html;
 	}
 }
