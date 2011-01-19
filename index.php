@@ -3,7 +3,7 @@
 require_once 'ezgantt.class.php';
 
 
-$ezgantt = new EZGantt('Test', '2011-01-01', '2011-01-10');
+$ezgantt = new EZGantt('Ein überneuer Test', '2011-01-01', '2011-01-10');
 
 $ezgantt->add_milestone('Test2', '2011-01-02', '2011-01-04', 'Kategorie');
 $ezgantt->add_milestone('Test1', '2011-01-02', '2011-01-04');
