@@ -83,7 +83,7 @@ class EZGantt {
 	}
 	
 	public function getWidth(){
-	  return $this->$width;
+	  return $this->width;
 	}
 	
 	public function setWidth($width){
