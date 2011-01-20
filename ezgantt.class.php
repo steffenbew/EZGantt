@@ -126,6 +126,10 @@ class EZGantt {
 	}
 	
 	public function setStartDate($start_date){
+	  $day_of_week = (int) date('N', $start_date);
+	  if($day_of_week !== 1){
+	  	$start_date = $start_date - ($day_of_week - 1) * 60 * 60 * 24;
+	  }
 	  $this->start_date = $start_date;
 	  if(isset($this->end_date)){
 	    $this->duration = $this->getEndDate() - $this->getStartDate();
@@ -137,10 +141,22 @@ class EZGantt {
 	}
 	
 	public function setEndDate($end_date){
+	  $day_of_week = (int) date('N', $end_date);
+	  if($day_of_week !== 7){
+	  	$end_date = $end_date + (7 - $day_of_week) * 60 * 60 * 24;
+	  }
 	  $this->end_date = $end_date;
 	  if(isset($this->start_date)){
 	    $this->duration = $this->end_date - $this->start_date;
 	  }
+	}
+	
+	public function getFirstWeek(){
+		return (int) date('W', $this->getStartDate());
+	}
+	
+	public function getLastWeek(){
+		return (int) date('W', $this->getEndDate());
 	}
 	
 	public function getDuration(){
@@ -152,7 +168,7 @@ class EZGantt {
 	}
 	
 	public function getDurationInWeeks(){
-		return $this->getDurationInDays() / 7;
+		return $this->getLastWeek() - $this->getFirstWeek() + 1;
 	}
 	
 	private function _convert_date($date)
@@ -167,8 +183,10 @@ class EZGantt {
 	public function render()
 	{
 		$html = '';
+		
                 foreach($this->events as $event_category){
                     $html .= '<h3>' . $event_category['title'] . '</h3>';
+                    $html .= $this->_renderWeeks();
                     foreach($event_category['items'] as $item){
                         $html .= $this->_addEventLine($item['name'], $item['start'], $item['duration']);
                     }
@@ -180,6 +198,22 @@ class EZGantt {
 	
 	private function _layout(&$html){
 		$html = '<div id="ezgantt_' . $this->getSafeTitle() . '"><h2>' . $this->getTitle() . '</h2>' . $html . '</div>';		
+	}
+	
+	private function _renderWeeks()
+	{
+		$week_width = number_format(100 / $this->getDurationInWeeks(), 2);
+		
+		$html  = '';
+		
+		$html .= '<div class="ezgantt_weeks">';
+		for($i = $this->getFirstWeek(); $i <= $this->getLastWeek(); $i++)
+		{
+			$html .= '<div class="week week_'.$i.'" style="width: '.$week_width.'%;">KW '.$i.'</div>';
+		}
+		$html .= '</div>';
+		
+		return $html;
 	}
 	
 	private function _addEventLine($title, $start, $duration){

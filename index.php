@@ -5,8 +5,8 @@ require_once 'ezgantt.class.php';
 
 $ezgantt = new EZGantt('EZGantt');
 
-$ezgantt->add_milestone('Test1', '2011-01-03', '2011-02-06', 'Category 1');
-$ezgantt->add_milestone('Test2', '2011-01-03', '2011-02-12');
+$ezgantt->add_milestone('Test1', '2011-01-04', '2011-02-06', 'Category 1');
+$ezgantt->add_milestone('Test2', '2011-01-04', '2011-02-12');
 $ezgantt->add_milestone('Test3', '2011-01-12', '2011-02-20');
 $ezgantt->add_milestone('Test4', '2011-02-03', '2011-02-17', 'Category 1');
 $ezgantt->add_milestone('Test5', '2011-04-15', '2011-05-19', 'Category 2');

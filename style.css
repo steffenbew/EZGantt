@@ -11,6 +11,7 @@
 
 div.ezgantt_row {
 	background: #eee;
+	clear: both;
 	height: 1%;
 	overflow: auto;
 	padding: 2px 0;
@@ -25,7 +26,7 @@ div.sidebar_title {
 
 div.event_wrapper {
 	display: block;
-	float: left;;
+	float: left;
 	width: 700px;
 }
 	div.event {
@@ -33,6 +34,22 @@ div.event_wrapper {
 		color: #fff;
 		height: 1.3em;
 		display: block;
+		text-align: center;
+		overflow: hidden;
+	}
+
+div.ezgantt_weeks {
+	float: right;
+	font-size: 0.3em;
+	height: 1%;
+	line-height: 1.3em;
+	overflow: auto;
+	width: 700px;
+}
+	div.ezgantt_weeks .week {
+		background-color: #444;
+		color: #fff;
+		float: left;
 		text-align: center;
 		overflow: hidden;
 	}
