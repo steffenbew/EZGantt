@@ -177,7 +177,7 @@ class EZGantt {
 	}
 	
 	private function _get_duration_in_days($start, $end){
-	  return ceil(($end - $start) / 60 / 60 / 24);
+	  return ceil(($end - $start) / 60 / 60 / 24) + 1;
 	}
 	
 	public function render()
