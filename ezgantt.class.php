@@ -150,7 +150,7 @@ class EZGantt {
 	}
 	
 	public function getDurationInDays(){
-	  return ceil($this->duration / 60 / 60 / 24);
+	  return ceil($this->duration / 60 / 60 / 24) + 1;
 	}
 	
 	public function getDurationInWeeks(){
