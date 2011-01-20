@@ -1,12 +1,55 @@
-div.event {
-  background-color: grey;
-  height: 20px;
-  margin-top: 4px;
-  display: inline-block;
-  clear: right;
-  
+#ezgantt_ezgantt {
+	font-size: 1em;
+	line-height: 1.3em;
+	width: 800px;
 }
+
+#ezgantt_ezgantt h2 {
+	text-align: center;
+	width: 100%;
+}
+
+div.ezgantt_row {
+	background: #eee;
+	clear: both;
+	height: 1%;
+	overflow: auto;
+	padding: 2px 0;
+}
+
 div.sidebar_title {
-  display: inline-block;
-  clear: left;
+	background: #ccc;
+	display: block;
+	float: left;
+	width: 100px;
 }
+
+div.event_wrapper {
+	display: block;
+	float: left;
+	width: 700px;
+}
+	div.event {
+		background-color: #777;
+		color: #fff;
+		height: 1.3em;
+		display: block;
+		text-align: center;
+		overflow: hidden;
+	}
+
+div.ezgantt_weeks {
+	float: right;
+	font-size: 0.3em;
+	height: 1%;
+	line-height: 1.3em;
+	overflow: auto;
+	width: 700px;
+}
+	div.ezgantt_weeks .week {
+		background-color: #444;
+		color: #fff;
+		float: left;
+		text-align: center;
+		overflow: hidden;
+	}

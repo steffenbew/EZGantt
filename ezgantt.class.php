@@ -2,16 +2,13 @@
 
 class EZGantt {
 
-	private $title, $start_date, $end_date, $width, $safeTitle, $duration, $sidebar_width = 100;
+	private $title, $start_date, $end_date, $safeTitle, $duration;
 
 	private $events = array();
 
-	function __construct($title = 'EZGantt', $start_date, $end_date, $width = '600')
+	function __construct($title = 'EZGantt')
 	{
 		$this->setTitle($title);
-		$this->setStartDate($start_date);
-		$this->setEndDate($end_date);
-		$this->setWidth($width);
 	}
 	
 	public function add_milestone($name, $start_date, $end_date, $category = NULL)
@@ -19,6 +16,15 @@ class EZGantt {
 	
 		$start_date	= $this->_convert_date($start_date);
 		$end_date	= $this->_convert_date($end_date);
+
+		if(!$this->getStartDate() || $start_date < $this->getStartDate())
+		{
+			$this->setStartDate($start_date);
+		}
+		if($end_date > $this->getEndDate())
+		{
+			$this->setEndDate($end_date);
+		}
 		
 	
 		$found = NULL;
@@ -52,7 +58,7 @@ class EZGantt {
 					'name'      => $name,
 					'start'     => $start_date,
 					'end'       => $end_date,
-                                        'duration'  => $this->_get_duration_in_days($start_date, $end_date)
+					'duration'  => $this->_get_duration_in_days($start_date, $end_date)
 					);
 		}
 		
@@ -120,7 +126,11 @@ class EZGantt {
 	}
 	
 	public function setStartDate($start_date){
-	  $this->start_date = $this->_convert_date($start_date);
+	  $day_of_week = (int) date('N', $start_date);
+	  if($day_of_week !== 1){
+	  	$start_date = $start_date - ($day_of_week - 1) * 60 * 60 * 24;
+	  }
+	  $this->start_date = $start_date;
 	  if(isset($this->end_date)){
 	    $this->duration = $this->getEndDate() - $this->getStartDate();
 	  }
@@ -131,10 +141,22 @@ class EZGantt {
 	}
 	
 	public function setEndDate($end_date){
-	  $this->end_date = $this->_convert_date($end_date);
+	  $day_of_week = (int) date('N', $end_date);
+	  if($day_of_week !== 7){
+	  	$end_date = $end_date + (7 - $day_of_week) * 60 * 60 * 24;
+	  }
+	  $this->end_date = $end_date;
 	  if(isset($this->start_date)){
 	    $this->duration = $this->end_date - $this->start_date;
 	  }
+	}
+	
+	public function getFirstWeek(){
+		return (int) date('W', $this->getStartDate());
+	}
+	
+	public function getLastWeek(){
+		return (int) date('W', $this->getEndDate());
 	}
 	
 	public function getDuration(){
@@ -142,15 +164,11 @@ class EZGantt {
 	}
 	
 	public function getDurationInDays(){
-	  return $this->duration / 60 / 60 / 24 + 1;
+	  return ceil($this->duration / 60 / 60 / 24);
 	}
 	
-	public function getWidth(){
-	  return $this->width;
-	}
-	
-	public function setWidth($width){
-	  $this->width = $width;
+	public function getDurationInWeeks(){
+		return $this->getLastWeek() - $this->getFirstWeek() + 1;
 	}
 	
 	private function _convert_date($date)
@@ -159,14 +177,16 @@ class EZGantt {
 	}
 	
 	private function _get_duration_in_days($start, $end){
-	  return ($end - $start) / 60 / 60 / 24 + 1;
+	  return ceil(($end - $start) / 60 / 60 / 24);
 	}
 	
 	public function render()
 	{
 		$html = '';
+		
                 foreach($this->events as $event_category){
                     $html .= '<h3>' . $event_category['title'] . '</h3>';
+                    $html .= $this->_renderWeeks();
                     foreach($event_category['items'] as $item){
                         $html .= $this->_addEventLine($item['name'], $item['start'], $item['duration']);
                     }
@@ -177,14 +197,29 @@ class EZGantt {
 	}
 	
 	private function _layout(&$html){
-		$html = '<div id="ezgantt_' . $this->getSafeTitle() . '" style="width: ' . $this->getWidth() . 'px;"><h2 style="text-align: center; width: 100%;">' . $this->getTitle() . '</h2>' . $html . '</div>';		
+		$html = '<div id="ezgantt_' . $this->getSafeTitle() . '"><h2>' . $this->getTitle() . '</h2>' . $html . '</div>';		
+	}
+	
+	private function _renderWeeks()
+	{
+		$week_width = number_format(100 / $this->getDurationInWeeks(), 2);
+		
+		$html  = '';
+		
+		$html .= '<div class="ezgantt_weeks">';
+		for($i = $this->getFirstWeek(); $i <= $this->getLastWeek(); $i++)
+		{
+			$html .= '<div class="week week_'.$i.'" style="width: '.$week_width.'%;">KW '.$i.'</div>';
+		}
+		$html .= '</div>';
+		
+		return $html;
 	}
 	
 	private function _addEventLine($title, $start, $duration){
-	  $width_factor = ($this->getWidth()-$this->sidebar_width);
-          $margin = (($this->_get_duration_in_days($this->getStartDate(), $start) - 1) / floatVal($this->getDurationInDays()))*$width_factor;
-	  $width = ($duration / floatVal($this->getDurationInDays()))*$width_factor;
-	  $html = '<div class="ezgantt_row"><div class="sidebar_title" style="width:' . $this->sidebar_width . 'px;">' . $title . '</div><div class="event" style="margin-left:' . $margin . 'px; width:' . $width . 'px;"></div></div>';
+      $margin = number_format(($this->_get_duration_in_days($this->getStartDate(), $start) / $this->getDurationInDays()) * 100, 2);
+	  $width = number_format(($duration / $this->getDurationInDays()) * 100, 2);
+	  $html = '<div class="ezgantt_row"><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;">' . $duration . ' days</div></div></div>';
 	  return $html;
 	}
 }
