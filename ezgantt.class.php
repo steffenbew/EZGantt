@@ -6,11 +6,9 @@ class EZGantt {
 
 	private $events = array();
 
-	function __construct($title = 'EZGantt', $start_date, $end_date)
+	function __construct($title = 'EZGantt')
 	{
 		$this->setTitle($title);
-		$this->setStartDate($start_date);
-		$this->setEndDate($end_date);
 	}
 	
 	public function add_milestone($name, $start_date, $end_date, $category = NULL)
@@ -18,6 +16,15 @@ class EZGantt {
 	
 		$start_date	= $this->_convert_date($start_date);
 		$end_date	= $this->_convert_date($end_date);
+
+		if(!$this->getStartDate() || $start_date < $this->getStartDate())
+		{
+			$this->setStartDate($start_date);
+		}
+		if($end_date > $this->getEndDate())
+		{
+			$this->setEndDate($end_date);
+		}
 		
 	
 		$found = NULL;
@@ -119,7 +126,7 @@ class EZGantt {
 	}
 	
 	public function setStartDate($start_date){
-	  $this->start_date = $this->_convert_date($start_date);
+	  $this->start_date = $start_date;
 	  if(isset($this->end_date)){
 	    $this->duration = $this->getEndDate() - $this->getStartDate();
 	  }
@@ -130,7 +137,7 @@ class EZGantt {
 	}
 	
 	public function setEndDate($end_date){
-	  $this->end_date = $this->_convert_date($end_date);
+	  $this->end_date = $end_date;
 	  if(isset($this->start_date)){
 	    $this->duration = $this->end_date - $this->start_date;
 	  }
@@ -142,6 +149,10 @@ class EZGantt {
 	
 	public function getDurationInDays(){
 	  return ceil($this->duration / 60 / 60 / 24);
+	}
+	
+	public function getDurationInWeeks(){
+		return $this->getDurationInDays() / 7;
 	}
 	
 	private function _convert_date($date)

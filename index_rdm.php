@@ -18,11 +18,11 @@ list($chart_start, $chart_end) = randomPeriod(strtotime('2011-01-01'), strtotime
 $categories = array('Category 1', 'Category 2', 'Category 3', '');
 
 
-$ezgantt = new EZGantt('EZGantt', $chart_start, $chart_end);
+$ezgantt = new EZGantt('EZGantt');
 
 for($i = 0; $i < rand(3, 15); $i++)
 {
-	list($start, $end) = randomPeriod($ezgantt->getStartDate(), $ezgantt->getEndDate());
+	list($start, $end) = randomPeriod(strtotime($chart_start), strtotime($chart_end));
 	$ezgantt->add_milestone("Test-$i", $start, $end, $categories[array_rand($categories)]);
 }
 ?>
