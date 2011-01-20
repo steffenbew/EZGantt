@@ -174,7 +174,7 @@ class EZGantt {
 	private function _addEventLine($title, $start, $duration){
       $margin = number_format(($this->_get_duration_in_days($this->getStartDate(), $start) / $this->getDurationInDays()) * 100, 2);
 	  $width = number_format(($duration / $this->getDurationInDays()) * 100, 2);
-	  $html = '<div class="ezgantt_row"><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;"></div></div></div>';
+	  $html = '<div class="ezgantt_row"><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;">' . $duration . ' days</div></div></div>';
 	  return $html;
 	}
 }

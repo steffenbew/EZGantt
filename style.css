@@ -30,6 +30,9 @@ div.event_wrapper {
 }
 	div.event {
 		background-color: #777;
+		color: #fff;
 		height: 1.3em;
 		display: block;
+		text-align: center;
+		overflow: hidden;
 	}
