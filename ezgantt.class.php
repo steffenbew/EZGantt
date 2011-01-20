@@ -2,16 +2,15 @@
 
 class EZGantt {
 
-	private $title, $start_date, $end_date, $width, $safeTitle, $duration, $sidebar_width = 100;
+	private $title, $start_date, $end_date, $safeTitle, $duration;
 
 	private $events = array();
 
-	function __construct($title = 'EZGantt', $start_date, $end_date, $width = '600')
+	function __construct($title = 'EZGantt', $start_date, $end_date)
 	{
 		$this->setTitle($title);
 		$this->setStartDate($start_date);
 		$this->setEndDate($end_date);
-		$this->setWidth($width);
 	}
 	
 	public function add_milestone($name, $start_date, $end_date, $category = NULL)
@@ -145,14 +144,6 @@ class EZGantt {
 	  return $this->duration / 60 / 60 / 24 + 1;
 	}
 	
-	public function getWidth(){
-	  return $this->width;
-	}
-	
-	public function setWidth($width){
-	  $this->width = $width;
-	}
-	
 	private function _convert_date($date)
 	{
 		return strtotime($date);
@@ -177,14 +168,13 @@ class EZGantt {
 	}
 	
 	private function _layout(&$html){
-		$html = '<div id="ezgantt_' . $this->getSafeTitle() . '" style="width: ' . $this->getWidth() . 'px;"><h2 style="text-align: center; width: 100%;">' . $this->getTitle() . '</h2>' . $html . '</div>';		
+		$html = '<div id="ezgantt_' . $this->getSafeTitle() . '"><h2>' . $this->getTitle() . '</h2>' . $html . '</div>';		
 	}
 	
 	private function _addEventLine($title, $start, $duration){
-	  $width_factor = ($this->getWidth()-$this->sidebar_width);
-          $margin = (($this->_get_duration_in_days($this->getStartDate(), $start) - 1) / floatVal($this->getDurationInDays()))*$width_factor;
-	  $width = ($duration / floatVal($this->getDurationInDays()))*$width_factor;
-	  $html = '<div class="ezgantt_row"><div class="sidebar_title" style="width:' . $this->sidebar_width . 'px;">' . $title . '</div><div class="event" style="margin-left:' . $margin . 'px; width:' . $width . 'px;"></div></div>';
+      $margin = number_format((($this->_get_duration_in_days($this->getStartDate(), $start) - 1) / $this->getDurationInDays())*100, 2);
+	  $width = number_format(($duration / $this->getDurationInDays())*100, 2);
+	  $html = '<div class="ezgantt_row"><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;"></div></div></div>';
 	  return $html;
 	}
 }
