@@ -66,18 +66,9 @@ class EZGantt {
 
 	}
 	
-	private function _safeTag($str, $separator = 'dash', $lowercase = TRUE)
+	private function _safeTag($str)
 	{
-		if ($separator == 'dash')
-		{
-			$search		= '_';
-			$replace	= '-';
-		}
-		else
-		{
-			$search		= '-';
-			$replace	= '_';
-		}
+		$replace	= '-';
 		
         $str = strtolower(htmlentities($str, ENT_COMPAT, 'UTF-8'));
         $str = preg_replace('/&(.)(acute|cedil|circ|lig|grave|ring|tilde|uml);/', "$1", $str);
@@ -99,13 +90,8 @@ class EZGantt {
 		{
 			$str = preg_replace("#".$key."#i", $val, $str);
 		}
-
-		if ($lowercase === TRUE)
-		{
-			$str = strtolower($str);
-		}
 		
-		return trim(stripslashes($str));
+		return trim(stripslashes(strtolower($str)));
 	}
 	
 	public function getTitle(){
@@ -168,7 +154,7 @@ class EZGantt {
 	}
 	
 	public function getDurationInWeeks(){
-		return $this->getLastWeek() - $this->getFirstWeek() + 1;
+		return ceil($this->getDurationInDays() / 7);
 	}
 	
 	private function _convert_date($date)
@@ -180,17 +166,24 @@ class EZGantt {
 	  return ceil(($end - $start) / 60 / 60 / 24);
 	}
 	
+	private function _sortByCategory($a, $b)
+	{
+		return strcmp($a["title"], $b["title"]);
+	}
+	
 	public function render()
 	{
 		$html = '';
 		
-                foreach($this->events as $event_category){
-                    $html .= '<h3>' . $event_category['title'] . '</h3>';
-                    $html .= $this->_renderWeeks();
-                    foreach($event_category['items'] as $item){
-                        $html .= $this->_addEventLine($item['name'], $item['start'], $item['duration']);
-                    }
-                }
+		usort($this->events, array("self", "_sortByCategory"));
+		
+        foreach($this->events as $event_category){
+            $html .= '<h3>' . $event_category['title'] . '</h3>';
+            $html .= $this->_renderWeeks();
+            foreach($event_category['items'] as $item){
+                $html .= $this->_addEventLine($item['name'], $item['start'], $item['duration']);
+            }
+        }
 		
 		$this->_layout($html);
 		return $html;
@@ -204,12 +197,13 @@ class EZGantt {
 	{
 		$week_width = number_format(100 / $this->getDurationInWeeks(), 2);
 		
-		$html  = '';
+		$html = '<div class="ezgantt_weeks">';
 		
-		$html .= '<div class="ezgantt_weeks">';
-		for($i = $this->getFirstWeek(); $i <= $this->getLastWeek(); $i++)
+		for($i = 0, $week = $this->getFirstWeek(); $i < $this->getDurationInWeeks(); $week++, $i++)
 		{
-			$html .= '<div class="week week_'.$i.'" style="width: '.$week_width.'%;">KW '.$i.'</div>';
+			$html .= '<div class="week week_'.$week.'" style="width: '.$week_width.'%;">KW '.$week.'</div>';
+		
+			$week = $week === 52 ? 0 : $week;
 		}
 		$html .= '</div>';
 		
