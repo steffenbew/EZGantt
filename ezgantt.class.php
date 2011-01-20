@@ -51,7 +51,7 @@ class EZGantt {
 					'name'      => $name,
 					'start'     => $start_date,
 					'end'       => $end_date,
-                                        'duration'  => $this->_get_duration_in_days($start_date, $end_date)
+					'duration'  => $this->_get_duration_in_days($start_date, $end_date)
 					);
 		}
 		
@@ -141,7 +141,7 @@ class EZGantt {
 	}
 	
 	public function getDurationInDays(){
-	  return $this->duration / 60 / 60 / 24 + 1;
+	  return ceil($this->duration / 60 / 60 / 24);
 	}
 	
 	private function _convert_date($date)
@@ -150,7 +150,7 @@ class EZGantt {
 	}
 	
 	private function _get_duration_in_days($start, $end){
-	  return ($end - $start) / 60 / 60 / 24 + 1;
+	  return ceil(($end - $start) / 60 / 60 / 24);
 	}
 	
 	public function render()
@@ -172,8 +172,8 @@ class EZGantt {
 	}
 	
 	private function _addEventLine($title, $start, $duration){
-      $margin = number_format((($this->_get_duration_in_days($this->getStartDate(), $start) - 1) / $this->getDurationInDays())*100, 2);
-	  $width = number_format(($duration / $this->getDurationInDays())*100, 2);
+      $margin = number_format(($this->_get_duration_in_days($this->getStartDate(), $start) / $this->getDurationInDays()) * 100, 2);
+	  $width = number_format(($duration / $this->getDurationInDays()) * 100, 2);
 	  $html = '<div class="ezgantt_row"><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;"></div></div></div>';
 	  return $html;
 	}
