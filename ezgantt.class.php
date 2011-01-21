@@ -14,8 +14,8 @@ class EZGantt {
 	public function add_milestone($name, $start_date, $end_date, $category = NULL)
 	{
 	
-		$start_date	= $this->_convert_date($start_date);
-		$end_date	= $this->_convert_date($end_date);
+		$start_date	= $this->_convertDate($start_date);
+		$end_date	= $this->_convertDate($end_date);
 
 		if(!$this->getStartDate() || $start_date < $this->getStartDate())
 		{
@@ -47,7 +47,7 @@ class EZGantt {
 									'name'		=> $name,
 									'start'		=> $start_date,
 									'end'		=> $end_date,
-									'duration'	=> $this->_get_duration_in_days($start_date, $end_date) 
+									'duration'	=> $this->_calcDurationInDays($start_date, $end_date) 
 								)
 							)
 			);
@@ -58,7 +58,7 @@ class EZGantt {
 					'name'      => $name,
 					'start'     => $start_date,
 					'end'       => $end_date,
-					'duration'  => $this->_get_duration_in_days($start_date, $end_date)
+					'duration'  => $this->_calcDurationInDays($start_date, $end_date)
 					);
 		}
 		
@@ -157,12 +157,12 @@ class EZGantt {
 		return ceil($this->getDurationInDays() / 7);
 	}
 	
-	private function _convert_date($date)
+	private function _convertDate($date)
 	{
 		return strtotime($date);
 	}
 	
-	private function _get_duration_in_days($start, $end){
+	private function _calcDurationInDays($start, $end){
 	  return ceil(($end - $start) / 60 / 60 / 24) + 1;
 	}
 	
@@ -211,7 +211,7 @@ class EZGantt {
 	}
 	
 	private function _addEventLine($title, $start, $duration){
-      $margin = number_format(($this->_get_duration_in_days($this->getStartDate(), $start) / $this->getDurationInDays()) * 100, 2);
+      $margin = number_format(($this->_calcDurationInDays($this->getStartDate(), $start) / $this->getDurationInDays()) * 100, 2);
 	  $width = number_format(($duration / $this->getDurationInDays()) * 100, 2);
 	  $html = '<div class="ezgantt_row"><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;">' . $duration . ' days</div></div></div>';
 	  return $html;

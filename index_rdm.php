@@ -20,7 +20,7 @@ $categories = array('Category 1', 'Category 2', 'Category 3', '');
 
 $ezgantt = new EZGantt('EZGantt');
 
-for($i = 0; $i < rand(3, 15); $i++)
+for($i = 0; $i < rand(10, 15); $i++)
 {
 	list($start, $end) = randomPeriod(strtotime($chart_start), strtotime($chart_end));
 	$ezgantt->add_milestone("Test-$i", $start, $end, $categories[array_rand($categories)]);
@@ -32,9 +32,9 @@ for($i = 0; $i < rand(3, 15); $i++)
         <link type="text/css" href="style.css" rel="stylesheet">
     </head>
     <body>
-    	Chart is showing <?php echo $ezgantt->getDurationInDays(); ?> days.<br />
-    	Start date: <?php echo date('Y-m-d H:i:s', $ezgantt->getStartDate()); ?><br />
-    	End date: <?php echo date('Y-m-d H:i:s', $ezgantt->getEndDate()); ?>
+    	Chart is showing <?php echo $ezgantt->getDurationInDays(); ?> days / <?php echo $ezgantt->getDurationInWeeks(); ?> weeks.<br />
+    	Start date: <?php echo date('Y-m-d H:i:s (K\W W)', $ezgantt->getStartDate()); ?><br />
+    	End date: <?php echo date('Y-m-d H:i:s (K\W W)', $ezgantt->getEndDate()); ?>
         <?php echo $ezgantt->render(); ?>
     </body>
 </html>
