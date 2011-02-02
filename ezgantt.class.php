@@ -47,7 +47,7 @@ class EZGantt {
 									'name'		=> $name,
 									'start'		=> $start_date,
 									'end'		=> $end_date,
-									'duration'	=> $this->_calcDurationInDays($start_date, $end_date) 
+									'duration'	=> $this->_calcDurationInDays($start_date, $end_date) + 1 
 								)
 							)
 			);
@@ -58,7 +58,7 @@ class EZGantt {
 					'name'      => $name,
 					'start'     => $start_date,
 					'end'       => $end_date,
-					'duration'  => $this->_calcDurationInDays($start_date, $end_date)
+					'duration'  => $this->_calcDurationInDays($start_date, $end_date) + 1
 					);
 		}
 		
@@ -150,11 +150,11 @@ class EZGantt {
 	}
 	
 	public function getDurationInDays(){
-	  return ceil($this->duration / 60 / 60 / 24) + 1;
+	  return floor($this->duration / 60 / 60 / 24) + 1;
 	}
 	
 	public function getDurationInWeeks(){
-		return ceil($this->getDurationInDays() / 7);
+		return floor($this->getDurationInDays() / 7);
 	}
 	
 	private function _convertDate($date)
@@ -163,7 +163,7 @@ class EZGantt {
 	}
 	
 	private function _calcDurationInDays($start, $end){
-	  return ceil(($end - $start) / 60 / 60 / 24) + 1;
+	  return floor(($end - $start) / 60 / 60 / 24);
 	}
 	
 	private function _sortByCategory($a, $b)
@@ -194,14 +194,12 @@ class EZGantt {
 	}
 	
 	private function _renderWeeks()
-	{
-		$week_width = number_format(100 / $this->getDurationInWeeks(), 2);
-		
+	{		
 		$html = '<div class="ezgantt_weeks">';
 		
 		for($i = 0, $week = $this->getFirstWeek(); $i < $this->getDurationInWeeks(); $week++, $i++)
 		{
-			$html .= '<div class="week week_'.$week.'" style="width: '.$week_width.'%;">KW '.$week.'</div>';
+			$html .= '<div class="week week_'.$week.'">KW '.$week.'</div>';
 		
 			$week = $week === 52 ? 0 : $week;
 		}
@@ -211,8 +209,8 @@ class EZGantt {
 	}
 	
 	private function _addEventLine($title, $start, $duration){
-      $margin = number_format(($this->_calcDurationInDays($this->getStartDate(), $start) / $this->getDurationInDays()) * 100, 2);
-	  $width = number_format(($duration / $this->getDurationInDays()) * 100, 2);
+      $margin = floor(($this->_calcDurationInDays($this->getStartDate(), $start) / $this->getDurationInDays()) * 100 * 100) / 100;
+	  $width = floor(($duration / $this->getDurationInDays()) * 100 * 100) / 100;
 	  $html = '<div class="ezgantt_row"><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;">' . $duration . ' days</div></div></div>';
 	  return $html;
 	}

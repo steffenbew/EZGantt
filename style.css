@@ -39,6 +39,7 @@ div.event_wrapper {
 	}
 
 div.ezgantt_weeks {
+	display: table;
 	float: right;
 	font-size: 0.3em;
 	height: 1%;
@@ -49,7 +50,7 @@ div.ezgantt_weeks {
 	div.ezgantt_weeks .week {
 		background-color: #444;
 		color: #fff;
-		float: left;
+		display: table-cell;
 		text-align: center;
 		overflow: hidden;
 	}
