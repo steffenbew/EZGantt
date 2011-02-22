@@ -54,3 +54,8 @@ div.ezgantt_weeks {
 		text-align: center;
 		overflow: hidden;
 	}
+	
+	
+div.ezgantt_row.done .event {
+	background-color: blue;
+}

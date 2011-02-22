@@ -11,7 +11,7 @@ class EZGantt {
 		$this->setTitle($title);
 	}
 	
-	public function add_milestone($name, $start_date, $end_date, $category = NULL)
+	public function add_milestone($name, $start_date, $end_date, $category = NULL, $attributes = array())
 	{
 	
 		$start_date	= $this->_convertDate($start_date);
@@ -44,10 +44,11 @@ class EZGantt {
 				'title'	=> $category,
 				'items'	=> array(
 								array(
-									'name'		=> $name,
-									'start'		=> $start_date,
-									'end'		=> $end_date,
-									'duration'	=> $this->_calcDurationInDays($start_date, $end_date) + 1 
+									'name'				=> $name,
+									'start'				=> $start_date,
+									'end'					=> $end_date,
+									'duration'		=> $this->_calcDurationInDays($start_date, $end_date) + 1,
+									'attributes'	=> $attributes
 								)
 							)
 			);
@@ -55,10 +56,11 @@ class EZGantt {
 		else
 		{
 			$this->events[$found]['items'][] = array(
-					'name'      => $name,
-					'start'     => $start_date,
-					'end'       => $end_date,
-					'duration'  => $this->_calcDurationInDays($start_date, $end_date) + 1
+					'name'     	 => $name,
+					'start'     	=> $start_date,
+					'end'       	=> $end_date,
+					'duration'		=> $this->_calcDurationInDays($start_date, $end_date) + 1,
+					'attributes'	=> $attributes
 					);
 		}
 		
@@ -75,13 +77,13 @@ class EZGantt {
 
 		$trans = array(
 						'&\#\d+?;'				=> '',
-						'&\S+?;'				=> '',
-						'\s+'					=> $replace,
-						'[^a-z0-9\-\._]'		=> '',
+						'&\S+?;'					=> '',
+						'\s+'							=> $replace,
+						'[^a-z0-9\-\._]'	=> '',
 						$replace.'+'			=> $replace,
 						$replace.'$'			=> $replace,
 						'^'.$replace			=> $replace,
-						'\.+$'					=> ''
+						'\.+$'						=> ''
 					  );
 
 		$str = strip_tags($str);
@@ -170,6 +172,40 @@ class EZGantt {
 	{
 		return strcmp($a["title"], $b["title"]);
 	}
+
+	
+	function _merge_html_attributes()
+	{
+		$result = array();
+		
+		for($i = 0; $i < func_num_args(); $i++)
+		{
+			// add attributes
+			foreach(func_get_arg($i) AS $key => $value)
+			{
+					$result[$key] = isset($result[$key]) ? $result[$key] ." ". $value : $value;
+			}
+			
+			// filter unique attributes
+			foreach($result AS $key => $value)
+			{
+				$result[$key] = implode(" ", array_unique(explode(" ", $value)));
+			}
+		}
+		return $result;
+	}
+	
+	
+	private function _attributes_to_html($attributes)
+	{		
+		$html = "";
+		foreach($attributes AS $attribute => $value)
+		{
+			$html .= $attribute . '="' . $value . '" ';
+		}
+		return trim($html);
+	}
+
 	
 	public function render()
 	{
@@ -181,7 +217,7 @@ class EZGantt {
             $html .= '<h3>' . $event_category['title'] . '</h3>';
             $html .= $this->_renderWeeks();
             foreach($event_category['items'] as $item){
-                $html .= $this->_addEventLine($item['name'], $item['start'], $item['duration']);
+                $html .= $this->_addEventLine($item['name'], $item['start'], $item['duration'], $item['attributes']);
             }
         }
 		
@@ -208,10 +244,14 @@ class EZGantt {
 		return $html;
 	}
 	
-	private function _addEventLine($title, $start, $duration){
-      $margin = floor(($this->_calcDurationInDays($this->getStartDate(), $start) / $this->getDurationInDays()) * 100 * 100) / 100;
-	  $width = floor(($duration / $this->getDurationInDays()) * 100 * 100) / 100;
-	  $html = '<div class="ezgantt_row"><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;">' . $duration . ' days</div></div></div>';
+	private function _addEventLine($title, $start, $duration, $attributes){
+    $margin 		= floor(($this->_calcDurationInDays($this->getStartDate(), $start) / $this->getDurationInDays()) * 100 * 100) / 100;
+	  $width 			= floor(($duration / $this->getDurationInDays()) * 100 * 100) / 100;
+	  
+	  $merged_attributes 	= $this->_merge_html_attributes(array('class' => 'ezgantt_row'), $attributes);
+	  $html_attributes 		= $this->_attributes_to_html($merged_attributes);
+
+	  $html 			= '<div ' . $html_attributes . '><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;">' . $duration . ' days</div></div></div>';
 	  return $html;
 	}
 }
