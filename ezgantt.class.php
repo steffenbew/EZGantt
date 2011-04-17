@@ -11,7 +11,7 @@ class EZGantt {
 		$this->setTitle($title);
 	}
 	
-	public function add_milestone($name, $start_date, $end_date, $category = NULL, $attributes = array())
+	public function add_milestone($name, $link, $start_date, $end_date, $category = NULL, $attributes = array())
 	{
 	
 		$start_date	= $this->_convertDate($start_date);
@@ -45,6 +45,7 @@ class EZGantt {
 				'items'	=> array(
 								array(
 									'name'				=> $name,
+									'link'				=> $link,
 									'start'				=> $start_date,
 									'end'					=> $end_date,
 									'duration'		=> $this->_calcDurationInDays($start_date, $end_date) + 1,
@@ -56,8 +57,9 @@ class EZGantt {
 		else
 		{
 			$this->events[$found]['items'][] = array(
-					'name'     	 => $name,
-					'start'     	=> $start_date,
+					'name'     		=> $name,
+					'link'				=> $link,
+					'start'    		=> $start_date,
 					'end'       	=> $end_date,
 					'duration'		=> $this->_calcDurationInDays($start_date, $end_date) + 1,
 					'attributes'	=> $attributes
@@ -214,11 +216,13 @@ class EZGantt {
 		usort($this->events, array("self", "_sortByCategory"));
 		
         foreach($this->events as $event_category){
+            $html .= '<div class="ezgantt_milestone">';
             $html .= '<h3>' . $event_category['title'] . '</h3>';
             $html .= $this->_renderWeeks();
             foreach($event_category['items'] as $item){
-                $html .= $this->_addEventLine($item['name'], $item['start'], $item['duration'], $item['attributes']);
+                $html .= $this->_addEventLine($item['name'], $item['link'], $item['start'], $item['duration'], $item['attributes']);
             }
+            $html .= '</div>';
         }
 		
 		$this->_layout($html);
@@ -226,32 +230,32 @@ class EZGantt {
 	}
 	
 	private function _layout(&$html){
-		$html = '<div id="ezgantt_' . $this->getSafeTitle() . '"><h2>' . $this->getTitle() . '</h2>' . $html . '</div>';		
+		$html = '<div class="ezgantt" id="ezgantt_' . $this->getSafeTitle() . '"><h2>' . $this->getTitle() . '</h2>' . $html . '</div>';		
 	}
 	
 	private function _renderWeeks()
 	{		
-		$html = '<div class="ezgantt_weeks">';
+		$html = '<div class="ezgantt_weeks"><table><tr>';
 		
 		for($i = 0, $week = $this->getFirstWeek(); $i < $this->getDurationInWeeks(); $week++, $i++)
 		{
-			$html .= '<div class="week week_'.$week.'">KW '.$week.'</div>';
+			$html .= '<td class="week week_'.$week.'">KW '.$week.'</td>';
 		
 			$week = $week === 52 ? 0 : $week;
 		}
-		$html .= '</div>';
+		$html .= '</tr></table></div>';
 		
 		return $html;
 	}
 	
-	private function _addEventLine($title, $start, $duration, $attributes){
-    $margin 		= floor(($this->_calcDurationInDays($this->getStartDate(), $start) / $this->getDurationInDays()) * 100 * 100) / 100;
-	  $width 			= floor(($duration / $this->getDurationInDays()) * 100 * 100) / 100;
+	private function _addEventLine($title, $link, $start, $duration, $attributes){
+    $margin 		= number_format((floor(($this->_calcDurationInDays($this->getStartDate(), $start) / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
+	  $width 			= number_format((floor(($duration / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
 	  
 	  $merged_attributes 	= $this->_merge_html_attributes(array('class' => 'ezgantt_row'), $attributes);
 	  $html_attributes 		= $this->_attributes_to_html($merged_attributes);
 
-	  $html 			= '<div ' . $html_attributes . '><div class="sidebar_title">' . $title . '</div><div class="event_wrapper"><div class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;">' . $duration . ' days</div></div></div>';
+	  $html 			= '<div ' . $html_attributes . '><div class="sidebar_title"><a href="' . $link . '" title="' . $title . '">' . $title . '</a></div><div class="event_wrapper"><a href="' . $link . '" title="' . $title . '" class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;"></a></div></div>';
 	  return $html;
 	}
 }
