@@ -122,16 +122,16 @@ div.ezgantt_weeks table {
   padding: 0;
   margin: 0;
 }
-.legend span.in_progress,
-div.ezgantt_row .event {
+.legend span.active,
+div.ezgantt_row.active .event {
   background-color: rgba(241, 146, 0, 0.7);
 }
-.legend span.done,
-div.ezgantt_row.done .event {
+.legend span.completed,
+div.ezgantt_row.completed .event {
   background-color: rgba(24, 243, 100, 0.7);
 }
-.legend span.not_begun,
-div.ezgantt_row.not_begun .event {
+.legend span.open,
+div.ezgantt_row.open .event {
   background-color: rgba(243, 87, 12, 0.7);
 }
 /*******************************************************************************

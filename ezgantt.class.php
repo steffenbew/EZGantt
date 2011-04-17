@@ -11,7 +11,7 @@ class EZGantt {
 		$this->setTitle($title);
 	}
 	
-	public function add_milestone($name, $link, $start_date, $end_date, $category = NULL, $attributes = array())
+	public function add_milestone($name, $link, $start_date, $end_date, $category = NULL, $completed = FALSE)
 	{
 	
 		$start_date	= $this->_convertDate($start_date);
@@ -49,7 +49,7 @@ class EZGantt {
 									'start'				=> $start_date,
 									'end'					=> $end_date,
 									'duration'		=> $this->_calcDurationInDays($start_date, $end_date) + 1,
-									'attributes'	=> $attributes
+									'completed'		=> $completed
 								)
 							)
 			);
@@ -62,7 +62,7 @@ class EZGantt {
 					'start'    		=> $start_date,
 					'end'       	=> $end_date,
 					'duration'		=> $this->_calcDurationInDays($start_date, $end_date) + 1,
-					'attributes'	=> $attributes
+					'completed'		=> $completed
 					);
 		}
 		
@@ -220,7 +220,7 @@ class EZGantt {
             $html .= '<h3>' . $event_category['title'] . '</h3>';
             $html .= $this->_renderWeeks();
             foreach($event_category['items'] as $item){
-                $html .= $this->_addEventLine($item['name'], $item['link'], $item['start'], $item['duration'], $item['attributes']);
+                $html .= $this->_addEventLine($item['name'], $item['link'], $item['start'], $item['duration'], $item['completed']);
             }
             $html .= '</div>';
         }
@@ -248,11 +248,12 @@ class EZGantt {
 		return $html;
 	}
 	
-	private function _addEventLine($title, $link, $start, $duration, $attributes){
+	private function _addEventLine($title, $link, $start, $duration, $completed){
     $margin 		= number_format((floor(($this->_calcDurationInDays($this->getStartDate(), $start) / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
 	  $width 			= number_format((floor(($duration / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
 	  
-	  $merged_attributes 	= $this->_merge_html_attributes(array('class' => 'ezgantt_row'), $attributes);
+	  $status							= $completed === TRUE ? 'completed' : ($start > time() ? 'open' : 'active');
+	  $merged_attributes 	= $this->_merge_html_attributes(array('class' => 'ezgantt_row'), array('class' => $status));
 	  $html_attributes 		= $this->_attributes_to_html($merged_attributes);
 
 	  $html 			= '<div ' . $html_attributes . '><div class="sidebar_title"><a href="' . $link . '" title="' . $title . '">' . $title . '</a></div><div class="event_wrapper"><a href="' . $link . '" title="' . $title . '" class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;"></a></div></div>';
