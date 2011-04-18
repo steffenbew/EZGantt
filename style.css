@@ -48,7 +48,7 @@ div.ezgantt_row {
   overflow: auto;
   padding: 5px 0 0;
 }
-div.sidebar_title {
+div.ezgantt_task_title {
   display: block;
   float: left;
   height: 27px;
@@ -61,11 +61,11 @@ div.sidebar_title {
   white-space: nowrap;
   width: 17%;
 }
-div.sidebar_title:hover,
+div.ezgantt_task_title:hover,
 .ezgantt h3:hover {
 	overflow: visible;
 }
-div.sidebar_title a,
+div.ezgantt_task_title a,
 .ezgantt h3 a {
 	color: #000;
 	display: inline-block;
@@ -76,7 +76,7 @@ div.sidebar_title a,
 .ezgantt h3 a {
   color: #F19200;
 }
-div.sidebar_title a:hover,
+div.ezgantt_task_title a:hover,
 .ezgantt h3 a:hover {
 	background: #eee;
 }
@@ -84,12 +84,12 @@ div.sidebar_title a:hover,
   text-decoration: underline;
 }
 
-div.event_wrapper {
+div.ezgantt_task_wrapper {
   display: block;
   float: left;
   width: 80%;
 }
-a.event {
+a.ezgantt_task {
   background-color: #E5ECF9;
   border: 1px solid #C0C0C0;
   color: #666;
@@ -132,15 +132,15 @@ div.ezgantt_weeks table {
 	background-color: #ccc;
 }
 .legend span.active,
-div.ezgantt_row.active .event {
+div.ezgantt_row.active .ezgantt_task {
   background-color: rgba(241, 146, 0, 0.7);
 }
 .legend span.completed,
-div.ezgantt_row.completed .event {
+div.ezgantt_row.completed .ezgantt_task {
   background-color: rgba(24, 243, 100, 0.7);
 }
 .legend span.open,
-div.ezgantt_row.open .event {
+div.ezgantt_row.open .ezgantt_task {
   background-color: rgba(243, 87, 12, 0.7);
 }
 /*******************************************************************************

@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * EZGanttBaseObject
  *
  * - base object for milestones, tasks and the project plan itself
@@ -30,7 +30,7 @@ class EZGanttBaseObject
 	public function setTitle($title)
 	{
 		$this->title = $title;
-	  $this->safeTitle = $this->_safeTag($this->title);
+		$this->safeTitle = $this->_safeTag($this->title);
 		return $this;
 	}
 	
@@ -41,7 +41,7 @@ class EZGanttBaseObject
 	
 	public function getSafeTitle()
 	{
-	  return $this->safeTitle;
+		return $this->safeTitle;
 	}
 	
 	public function setStartDate($start_date)
@@ -53,7 +53,7 @@ class EZGanttBaseObject
 			# set start date to first day of the week
 			$this->start_date = $this->getFirstDayOfWeek($this->start_date);
 		}
-	  
+	
 		return $this;
 	}
 	
@@ -71,7 +71,7 @@ class EZGanttBaseObject
 			# set end date to last day of the week
 			$this->end_date = $this->getLastDayOfWeek($this->end_date);
 		}
-	  
+	
 		return $this;
 	}
 	
@@ -92,12 +92,12 @@ class EZGanttBaseObject
 	
 	public function getDuration()
 	{
-	  return $this->getEndDate() - $this->getStartDate();
+		return $this->getEndDate() - $this->getStartDate();
 	}
 	
 	public function getDurationInDays()
 	{
-	  return floor($this->getDuration() / 60 / 60 / 24) + 1;
+		return floor($this->getDuration() / 60 / 60 / 24) + 1;
 	}
 	
 	public function getDurationInWeeks()
@@ -144,7 +144,7 @@ class EZGanttBaseObject
 	
 	protected function calcDurationInDays($start, $end)
 	{
-	  return floor(($end - $start) / 60 / 60 / 24);
+		return floor(($end - $start) / 60 / 60 / 24);
 	}
 	
 	protected function sortByTitle(&$objects)
@@ -154,17 +154,13 @@ class EZGanttBaseObject
 	
 	protected function setDateRange($object)
 	{
-		# dynamically set start and end date if no static date range was set
-		if($this->dateIsDynamic() === TRUE)
+		if($this->getStartDate() === NULL || $object->getStartDate() < $this->getStartDate())
 		{
-			if($this->getStartDate() === NULL || $object->getStartDate() < $this->getStartDate())
-			{
-				$this->setStartDate($object->getStartDate());
-			}
-			if($this->getEndDate() === NULL || $object->getEndDate() > $this->getEndDate())
-			{
-				$this->setEndDate($object->getEndDate());
-			}
+			$this->setStartDate($object->getStartDate());
+		}
+		if($this->getEndDate() === NULL || $object->getEndDate() > $this->getEndDate())
+		{
+			$this->setEndDate($object->getEndDate());
 		}
 	}
 	
@@ -185,8 +181,8 @@ class EZGanttBaseObject
 	{
 		$replace	= '-';
 		
-        $str = strtolower(htmlentities($str, ENT_COMPAT, 'UTF-8'));
-        $str = preg_replace('/&(.)(acute|cedil|circ|lig|grave|ring|tilde|uml);/', "$1", $str);
+		$str = strtolower(htmlentities($str, ENT_COMPAT, 'UTF-8'));
+		$str = preg_replace('/&(.)(acute|cedil|circ|lig|grave|ring|tilde|uml);/', "$1", $str);
 
 		$trans = array(
 						'&\#\d+?;'				=> '',
@@ -197,7 +193,7 @@ class EZGanttBaseObject
 						$replace.'$'			=> $replace,
 						'^'.$replace			=> $replace,
 						'\.+$'						=> ''
-					  );
+						);
 
 		$str = strip_tags($str);
 
@@ -215,7 +211,7 @@ class EZGanttBaseObject
 	}
 }
 
-/* 
+/*
  * EZGanttEventObject
  *
  * - can be used to create milestones and tasks
@@ -252,7 +248,11 @@ class EZGanttEventObject extends EZGanttBaseObject
 		$task->setLink($link)->isCompleted($completed);
 		array_push($this->tasks, $task);
 		
-		$this->setDateRange($task);
+		# dynamically set start and end date if no static date range was set
+		if($this->dateIsDynamic() === TRUE)
+		{
+			$this->setDateRange($task);
+		}
 		
 		return $this;
 	}
@@ -265,7 +265,7 @@ class EZGanttEventObject extends EZGanttBaseObject
 }
 
 
-/* 
+/*
  * EZGantt
  *
  * - the main class
@@ -285,7 +285,11 @@ class EZGantt extends EZGanttBaseObject
 		$milestone->setLink($link)->isCompleted($completed);
 		array_push($this->milestones, $milestone);
 		
-		$this->setDateRange($milestone);
+		# dynamically set start and end date if no static date range was set
+		if($this->dateIsDynamic() === TRUE)
+		{
+			$this->setDateRange($milestone);
+		}
 		
 		return $milestone;
 	}
@@ -302,18 +306,21 @@ class EZGantt extends EZGanttBaseObject
 
 		# adjust project plan date range to minimum / maximum date of all tasks
 		# (only needed if a task date isn't within the range of its parent milestone)
-		foreach($this->getMilestones() AS $milestone)
+		if($this->dateIsDynamic() === TRUE)
 		{
-			foreach($milestone->getTasks() AS $task)
+			foreach($this->getMilestones() AS $milestone)
 			{
-				$this->setDateRange($task);
+				foreach($milestone->getTasks() AS $task)
+				{
+					$this->setDateRange($task);
+				}
 			}
 		}
 
-    foreach($this->getMilestones() AS $milestone)
-    {
-    	$html .= $this->_renderMilestone($milestone);
-    }
+		foreach($this->getMilestones() AS $milestone)
+		{
+			$html .= $this->_renderMilestone($milestone);
+		}
 		
 		$this->_layout($html);
 		return $html;
@@ -329,7 +336,7 @@ class EZGantt extends EZGanttBaseObject
 	
 	private function _renderMilestone($milestone)
 	{
-	  $status	= $milestone->isCompleted() === TRUE ? 'completed' : ($milestone->getStartDate() > time() ? 'open' : 'active');
+		$status= $milestone->isCompleted() === TRUE ? 'completed' : ($milestone->getStartDate() > time() ? 'open' : 'active');
 		$html  = '<div class="ezgantt_milestone ' . $status . '">';
 		$html .= '<h3><a href="' . $milestone->getLink() . '">' . $milestone->getTitle() . '</a></h3>';
 		$html .= $this->_renderWeeks($milestone);
@@ -347,6 +354,7 @@ class EZGantt extends EZGanttBaseObject
 		$html = '<div class="ezgantt_weeks"><table><tr>';
 		for($i = 0, $week = $this->getFirstWeek(); $i < $this->getDurationInWeeks(); $week++, $i++)
 		{
+			# determine if the current week is within the milestones date range
 			$weekStartDate	= $this->getFirstDayOfWeek($this->getStartDate() + (60 * 60 * 24 * 7) * $i);
 			$weekEndDate		= $this->getLastDayOfWeek($weekStartDate);
 
@@ -362,12 +370,20 @@ class EZGantt extends EZGanttBaseObject
 	
 	private function _renderTask($task)
 	{
-    $margin 		= number_format((floor(($this->calcDurationInDays($this->getStartDate(), $task->getStartDate()) / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
-	  $width 			= number_format((floor(($task->getDurationInDays() / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
-	  
-	  $status			= $task->isCompleted() === TRUE ? 'completed' : ($task->getStartDate() > time() ? 'open' : 'active');
+		$margin = number_format((floor(($this->calcDurationInDays($this->getStartDate(), $task->getStartDate()) / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
+		$width 	= number_format((floor(($task->getDurationInDays() / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
+		
+		$status	= $task->isCompleted() === TRUE ? 'completed' : ($task->getStartDate() > time() ? 'open' : 'active');
 
-	  $html 			= '<div class="ezgantt_row ' . $status . '"><div class="sidebar_title"><a href="' . $task->getLink() . '" title="' . $task->getTitle() . '">' . $task->getTitle() . '</a></div><div class="event_wrapper"><a href="' . $task->getLink() . '" title="' . $task->getTitle() . '" class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;"></a></div></div>';
-	  return $html;
+		$html		= '<div class="ezgantt_row ' . $status . '">';
+		$html	 .= 	'<div class="ezgantt_task_title">';
+		$html	 .= 		'<a href="' . $task->getLink() . '" title="' . $task->getTitle() . '">' . $task->getTitle() . '</a>';
+		$html	 .= 		'</div>';
+		$html	 .= 	'<div class="ezgantt_task_wrapper">';
+		$html	 .= 		'<a href="' . $task->getLink() . '" title="' . $task->getTitle() . '" class="ezgantt_task" style="margin-left:' . $margin . '%; width:' . $width . '%;"></a>';
+		$html	 .= 	'</div>';
+		$html	 .= '</div>';
+	
+		return $html;
 	}
 }
