@@ -326,6 +326,15 @@ class EZGantt extends EZGanttBaseObject
 		return $html;
 	}
 	
+	public function getMarginForToday()
+	{
+		if($this->getStartDate() < time() && $this->getEndDate() > time())
+		{
+			return number_format((floor(($this->calcDurationInDays($this->getStartDate(), time()) / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');		
+		}
+		return FALSE;
+	}
+	
 	
 	/* private methods */
 	

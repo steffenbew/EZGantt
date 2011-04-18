@@ -25,7 +25,6 @@ $milestone3->addTask('Some even longer description of what should be done', '201
 $milestone3->addTask('Test12', '2011-04-02', '2011-05-12', 'http://steffenbew.com');
 $milestone3->addTask('Test13', '2011-03-12', '2011-04-20', 'http://steffenbew.com');
 
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -46,6 +45,33 @@ $milestone3->addTask('Test13', '2011-03-12', '2011-04-20', 'http://steffenbew.co
 				<span class="active">Task in progress</span>
 				<span class="open">Task not yet begun</span>
 			</fieldset>
+
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+      <script>
+      <!--
+		  	$(document).ready(function () {
+		  	
+		  		// position a marker on the project plan for today
+		  		
+		  		var marker_margin = <?php echo $ezgantt->getMarginForToday(); ?>, title_width, object_width, total_margin;
+		  		
+					if(marker_margin !== -1) {
+						marker_margin	= marker_margin / 100,
+						title_width		= $('.ezgantt h3').outerWidth(),
+						object_width	= $('.ezgantt_weeks').outerWidth(),
+						total_margin	= object_width * marker_margin + title_width;
+						
+						$('.ezgantt_milestone').append('<div class="ezgantt_marker" style="left: ' + total_margin + 'px; height: 0;"></div>');
+						
+						setTimeout(function () {
+							$('.ezgantt_marker').animate({height:'100%'}, 1000);
+						}, 200);
+					}
+					
+		  	});
+		  -->
+      </script>
+			
     </body>
 </html>
 

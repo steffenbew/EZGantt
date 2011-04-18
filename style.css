@@ -40,6 +40,7 @@ body {
 }
 div.ezgantt_milestone {
   border-top: 1px solid #D0D0D0;
+  position: relative;
 }
 div.ezgantt_row {
   background: #FFFFFF;
@@ -167,4 +168,15 @@ fieldset.legend {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   -border-radius: 4px;
+}
+/*******************************************************************************
+  Custom marker for today
+*******************************************************************************/
+div.ezgantt_marker {
+	border-left: 1px solid red;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 1px;
 }
