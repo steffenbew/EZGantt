@@ -1,61 +1,170 @@
-#ezgantt_ezgantt {
-	font-size: 1em;
-	line-height: 1.3em;
-	width: 800px;
-}
-
-#ezgantt_ezgantt h2 {
-	text-align: center;
-	width: 100%;
-}
-
-div.ezgantt_row {
+body {
 	background: #eee;
-	clear: both;
-	height: 1%;
-	overflow: auto;
-	padding: 2px 0;
+	margin: 20px auto;
+	width: 80%;
 }
 
+/*******************************************************************************
+  Project plan
+*******************************************************************************/
+.ezgantt {
+  border-bottom: 4px solid black;
+  border-top: 4px solid black;
+  display: block;
+  font: 12px Arial,Helvetica,Verdana,sans-serif;
+	line-height: 1.2em;
+  width: 100%;
+}
+.ezgantt h2 {
+  background: #fff;
+  font-size: 100% !important;
+  margin: 0 !important;
+  padding: 3px 0;
+  text-align:center;
+  width: 100%;
+}
+.ezgantt h3 {
+  background: #eee;
+  color: #666666;
+  float: left;
+	font-size: 12px !important;
+  font-weight: bold !important;
+	height: 18px;
+	line-height: 18px;
+  margin: 0;
+  overflow: hidden;
+	padding: 0 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 20%;
+}
+div.ezgantt_milestone {
+  border-top: 1px solid #D0D0D0;
+}
+div.ezgantt_row {
+  background: #FFFFFF;
+  border-top: 1px solid #D0D0D0;
+  clear: both;
+  overflow: auto;
+  padding: 5px 0 0;
+}
 div.sidebar_title {
-	background: #ccc;
-	display: block;
-	float: left;
-	width: 100px;
+  display: block;
+  float: left;
+  height: 27px;
+  line-height: 27px;
+  overflow: hidden;
+  padding: 0 2% 0 1%;
+  text-align: left;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+  width: 17%;
+}
+div.sidebar_title:hover,
+.ezgantt h3:hover {
+	overflow: visible;
+}
+div.sidebar_title a,
+.ezgantt h3 a {
+	color: #000;
+	display: inline-block;
+	padding: 0 8px;
+	position: relative;
+	text-decoration: none;
+}
+.ezgantt h3 a {
+  color: #F19200;
+}
+div.sidebar_title a:hover,
+.ezgantt h3 a:hover {
+	background: #eee;
+}
+.ezgantt h3 a:hover {
+  text-decoration: underline;
 }
 
 div.event_wrapper {
-	display: block;
-	float: left;
-	width: 700px;
+  display: block;
+  float: left;
+  width: 80%;
 }
-	div.event {
-		background-color: #777;
-		color: #fff;
-		height: 1.3em;
-		display: block;
-		text-align: center;
-		overflow: hidden;
-	}
+a.event {
+  background-color: #E5ECF9;
+  border: 1px solid #C0C0C0;
+  color: #666;
+  display: block;
+  height: 25px;
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-align: center;
+  -webkit-border-radius:4px;
+  -moz-border-radius:4px;
+  -border-radius:4px;
+}
 
-div.ezgantt_weeks {
-	display: table;
-	float: right;
-	font-size: 0.3em;
-	height: 1%;
-	line-height: 1.3em;
-	overflow: auto;
-	width: 700px;
+.ezgantt_weeks {
+  background-color: #fff;
+  display: table;
+  float: right;
+  font-size: 10px;
+  height: 18px;
+  line-height: 1.5em;
+  overflow: auto;
+  width: 80%;
 }
-	div.ezgantt_weeks .week {
-		background-color: #444;
-		color: #fff;
-		display: table-cell;
-		text-align: center;
-		overflow: hidden;
-	}
-	
-	
-div.ezgantt_row.done .event {
-	background-color: blue;
+div.ezgantt_weeks table {
+	border-collapse: collapse;
+	width: 100%;
+}
+.ezgantt_weeks .week {
+  background-color: #eee;
+  color: #333333;
+  display: table-cell;
+  height: 18px;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+.ezgantt_weeks .week.active {
+	background-color: #ccc;
+}
+.legend span.active,
+div.ezgantt_row.active .event {
+  background-color: rgba(241, 146, 0, 0.7);
+}
+.legend span.completed,
+div.ezgantt_row.completed .event {
+  background-color: rgba(24, 243, 100, 0.7);
+}
+.legend span.open,
+div.ezgantt_row.open .event {
+  background-color: rgba(243, 87, 12, 0.7);
+}
+/*******************************************************************************
+  Legend
+*******************************************************************************/
+fieldset.legend {
+  font: 12px Arial,Helvetica,Verdana,sans-serif;
+  margin: 10px 0;
+  padding: 10px 10px 15px;
+}
+.legend legend {
+  color: #666;
+  font-size: 12px;
+  font-weight: bold;
+}
+.legend span {
+  background-color: #E5ECF9;
+  border: 1px solid silver;
+  color: #333;
+  font-weight: normal;
+  overflow: hidden;
+  padding: 3px 6px 4px;
+  text-align: center;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -border-radius: 4px;
 }
