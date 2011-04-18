@@ -2,7 +2,6 @@
 
 require_once 'ezgantt.class.php';
 
-
 function randomPeriod($start_date, $end_date)
 {
 	$random1 = rand($start_date, $end_date);
@@ -14,17 +13,24 @@ function randomPeriod($start_date, $end_date)
 	return array(date('Y-m-d', $start), date('Y-m-d', $end));
 }
 
-list($chart_start, $chart_end) = randomPeriod(strtotime('2011-03-01'), strtotime('2011-09-31'));
-$categories = array('Category 1', 'Category 2', 'Category 3', '');
-
+list($chart_start, $chart_end) = randomPeriod(strtotime('2011-01-01'), strtotime('2011-09-31'));
 
 $ezgantt = new EZGantt('EZGantt');
 
-for($i = 0; $i < rand(10, 15); $i++)
+for($i = 1; $i < rand(3, 6); $i++)
 {
-	$completed = rand(1, 5) === 1 ? TRUE : FALSE;
-	list($start, $end) = randomPeriod(strtotime($chart_start), strtotime($chart_end));
-	$ezgantt->add_milestone("Test-$i", "#", $start, $end, $categories[array_rand($categories)], $completed);
+	# add random milestones
+	$completed = rand(1, 3) === 1 ? TRUE : FALSE;
+	list($milestone_start, $milestone_end) = randomPeriod(strtotime($chart_start), strtotime($chart_end));
+	$milestone = $ezgantt->addMilestone("Milestone-$i", $milestone_start, $milestone_end, "#", $completed);
+	
+	# add random tasks to milestone
+	for($k = 0; $k < rand(3, 6); $k++)
+	{
+		$completed = rand(1, 5) === 1 ? TRUE : FALSE;
+		list($task_start, $task_end) = randomPeriod(strtotime($milestone_start), strtotime($milestone_end));
+		$milestone->addTask("Test-$k", $task_start, $task_end, "#", $completed);
+	}
 }
 ?>
 <!DOCTYPE html>
@@ -38,7 +44,7 @@ for($i = 0; $i < rand(10, 15); $i++)
     	Start date: <?php echo date('Y-m-d H:i:s (K\W W)', $ezgantt->getStartDate()); ?><br />
     	End date: <?php echo date('Y-m-d H:i:s (K\W W)', $ezgantt->getEndDate()); ?>
 -->
-      <?php echo $ezgantt->render(); ?>
+			<?php echo $ezgantt->render(); ?>
         
 			<fieldset class="legend">
 				<legend>Legend</legend>

@@ -1,73 +1,184 @@
 <?php
 
-class EZGantt {
-
-	private $title, $start_date, $end_date, $safeTitle, $duration;
-
-	private $events = array();
-
-	function __construct($title = 'EZGantt')
+/* 
+ * EZGanttBaseObject
+ *
+ * - base object for milestones, tasks and the project plan itself
+ *
+ */	
+class EZGanttBaseObject
+{
+	protected $title, $start_date, $end_date, $safeTitle, $duration, $dateIsDynamic = false;
+	
+	function __construct($title, $start_date = NULL, $end_date = NULL)
 	{
 		$this->setTitle($title);
-	}
-	
-	public function add_milestone($name, $link, $start_date, $end_date, $category = NULL, $completed = FALSE)
-	{
-	
-		$start_date	= $this->_convertDate($start_date);
-		$end_date	= $this->_convertDate($end_date);
-
-		if(!$this->getStartDate() || $start_date < $this->getStartDate())
+		if($start_date !== NULL && $end_date !== NULL)
 		{
 			$this->setStartDate($start_date);
-		}
-		if($end_date > $this->getEndDate())
-		{
 			$this->setEndDate($end_date);
-		}
-		
-	
-		$found = NULL;
-
-		foreach($this->events AS $key => $event)
-		{
-			if($event['title'] == $category)
-			{
-				$found = $key;
-				break;
-			}
-		}
-		
-		if($found === NULL)
-		{
-			$this->events[] = array(
-				'title'	=> $category,
-				'items'	=> array(
-								array(
-									'name'				=> $name,
-									'link'				=> $link,
-									'start'				=> $start_date,
-									'end'					=> $end_date,
-									'duration'		=> $this->_calcDurationInDays($start_date, $end_date) + 1,
-									'completed'		=> $completed
-								)
-							)
-			);
 		}
 		else
 		{
-			$this->events[$found]['items'][] = array(
-					'name'     		=> $name,
-					'link'				=> $link,
-					'start'    		=> $start_date,
-					'end'       	=> $end_date,
-					'duration'		=> $this->_calcDurationInDays($start_date, $end_date) + 1,
-					'completed'		=> $completed
-					);
+			$this->dateIsDynamic(true);
 		}
+	}
+	
+
+	/* public methods */
+	
+	public function setTitle($title)
+	{
+		$this->title = $title;
+	  $this->safeTitle = $this->_safeTag($this->title);
+		return $this;
+	}
+	
+	public function getTitle()
+	{
+		return $this->title;
+	}
+	
+	public function getSafeTitle()
+	{
+	  return $this->safeTitle;
+	}
+	
+	public function setStartDate($start_date)
+	{
+		$this->start_date = $this->_convertDateToTimestamp($start_date);
 		
+		if($this->dateIsDynamic() === TRUE)
+		{
+			# set start date to first day of the week
+			$this->start_date = $this->getFirstDayOfWeek($this->start_date);
+		}
+	  
+		return $this;
+	}
+	
+	public function getStartDate()
+	{
+		return $this->start_date;
+	}
+	
+	public function setEndDate($end_date)
+	{
+		$this->end_date = $this->_convertDateToTimestamp($end_date);
+		
+		if($this->dateIsDynamic() === TRUE)
+		{
+			# set end date to last day of the week
+			$this->end_date = $this->getLastDayOfWeek($this->end_date);
+		}
+	  
+		return $this;
+	}
+	
+	public function getEndDate()
+	{
+		return $this->end_date;
+	}
+	
+	public function getFirstWeek()
+	{
+		return (int) date('W', $this->getStartDate());
+	}
+	
+	public function getLastWeek()
+	{
+		return (int) date('W', $this->getEndDate());
+	}
+	
+	public function getDuration()
+	{
+	  return $this->getEndDate() - $this->getStartDate();
+	}
+	
+	public function getDurationInDays()
+	{
+	  return floor($this->getDuration() / 60 / 60 / 24) + 1;
+	}
+	
+	public function getDurationInWeeks()
+	{
+		return floor($this->getDurationInDays() / 7);
+	}
+	
+	public function getFirstDayOfWeek($day)
+	{
+		$day_of_week = (int) date('N', $day);
+		if($day_of_week !== 1)
+		{
+			$day = $day - ($day_of_week - 1) * 60 * 60 * 24;
+			# make sure we got the exact midnight time
+			$day = strtotime(date('Y-m-d', $day));
+		}
+		return $day;
+	}
+	
+	public function getLastDayOfWeek($day)
+	{
+		$day_of_week = (int) date('N', $day);
+		if($day_of_week !== 7)
+		{
+			$day = $day + (7 - $day_of_week) * 60 * 60 * 24;
+			# make sure we got the exact midnight time
+			$day = strtotime(date('Y-m-d', $day));
+		}
+		return $day;
+	}
 
 
+	/* protected methods */
+	
+	protected function dateIsDynamic($value = NULL)
+	{
+		if($value !== NULL)
+		{
+			$this->dateIsDynamic = (bool) $value;
+			return $this;
+		}
+		return $this->dateIsDynamic;
+	}
+	
+	protected function calcDurationInDays($start, $end)
+	{
+	  return floor(($end - $start) / 60 / 60 / 24);
+	}
+	
+	protected function sortByTitle(&$objects)
+	{
+		usort($objects, array("self", "_compareTitles"));
+	}
+	
+	protected function setDateRange($object)
+	{
+		# dynamically set start and end date if no static date range was set
+		if($this->dateIsDynamic() === TRUE)
+		{
+			if($this->getStartDate() === NULL || $object->getStartDate() < $this->getStartDate())
+			{
+				$this->setStartDate($object->getStartDate());
+			}
+			if($this->getEndDate() === NULL || $object->getEndDate() > $this->getEndDate())
+			{
+				$this->setEndDate($object->getEndDate());
+			}
+		}
+	}
+	
+	
+	/* private methods */
+	
+	private function _convertDateToTimestamp($date)
+	{
+		# if given value is already a valid timestamp, do nothing
+		if(strtotime(date('Y-m-d H:i:s', (int) $date)) === $date)
+		{
+			return $date;
+		}
+		return strtotime($date);
 	}
 	
 	private function _safeTag($str)
@@ -90,7 +201,7 @@ class EZGantt {
 
 		$str = strip_tags($str);
 
-		foreach ($trans as $key => $val)
+		foreach ($trans AS $key => $val)
 		{
 			$str = preg_replace("#".$key."#i", $val, $str);
 		}
@@ -98,165 +209,165 @@ class EZGantt {
 		return trim(stripslashes(strtolower($str)));
 	}
 	
-	public function getTitle(){
-	  return $this->title;
-	}
-	
-	public function setTitle($title){
-	  $this->safeTitle = $this->_safeTag($title);
-	  $this->title = $title;
-	}
-	
-	public function getSafeTitle(){
-	  return $this->safeTitle;
-	}
-	
-	public function getStartDate(){
-	  return $this->start_date;
-	}
-	
-	public function setStartDate($start_date){
-	  $day_of_week = (int) date('N', $start_date);
-	  if($day_of_week !== 1){
-	  	$start_date = $start_date - ($day_of_week - 1) * 60 * 60 * 24;
-	  }
-	  $this->start_date = $start_date;
-	  if(isset($this->end_date)){
-	    $this->duration = $this->getEndDate() - $this->getStartDate();
-	  }
-	}
-	
-	public function getEndDate(){
-	  return $this->end_date;
-	}
-	
-	public function setEndDate($end_date){
-	  $day_of_week = (int) date('N', $end_date);
-	  if($day_of_week !== 7){
-	  	$end_date = $end_date + (7 - $day_of_week) * 60 * 60 * 24;
-	  }
-	  $this->end_date = $end_date;
-	  if(isset($this->start_date)){
-	    $this->duration = $this->end_date - $this->start_date;
-	  }
-	}
-	
-	public function getFirstWeek(){
-		return (int) date('W', $this->getStartDate());
-	}
-	
-	public function getLastWeek(){
-		return (int) date('W', $this->getEndDate());
-	}
-	
-	public function getDuration(){
-	  return $this->duration; // Add another day?
-	}
-	
-	public function getDurationInDays(){
-	  return floor($this->duration / 60 / 60 / 24) + 1;
-	}
-	
-	public function getDurationInWeeks(){
-		return floor($this->getDurationInDays() / 7);
-	}
-	
-	private function _convertDate($date)
+	private function _compareTitles($a, $b)
 	{
-		return strtotime($date);
+		return strcmp($a->getTitle(), $b->getTitle());
 	}
-	
-	private function _calcDurationInDays($start, $end){
-	  return floor(($end - $start) / 60 / 60 / 24);
-	}
-	
-	private function _sortByCategory($a, $b)
-	{
-		return strcmp($a["title"], $b["title"]);
-	}
+}
 
+/* 
+ * EZGanttEventObject
+ *
+ * - can be used to create milestones and tasks
+ * - is capable of having child objects of itself (when creating a task for a milestone)
+ *
+ */	
+class EZGanttEventObject extends EZGanttBaseObject
+{
+	private $link, $completed = FALSE, $tasks = array();
 	
-	function _merge_html_attributes()
+	public function setLink($link)
 	{
-		$result = array();
+		$this->link = $link;
+		return $this;
+	}
+	
+	public function getLink()
+	{
+		return $this->link;
+	}
+	
+	public function isCompleted($value = NULL)
+	{
+		if($value !== NULL) {
+			$this->completed = (bool) $value;
+			return $this;
+		}
+		return $this->completed;
+	}
+	
+	public function addTask($title, $start_date, $end_date, $link, $completed = FALSE)
+	{
+		$task = new EZGanttEventObject($title, $start_date, $end_date);
+		$task->setLink($link)->isCompleted($completed);
+		array_push($this->tasks, $task);
 		
-		for($i = 0; $i < func_num_args(); $i++)
-		{
-			// add attributes
-			foreach(func_get_arg($i) AS $key => $value)
-			{
-					$result[$key] = isset($result[$key]) ? $result[$key] ." ". $value : $value;
-			}
-			
-			// filter unique attributes
-			foreach($result AS $key => $value)
-			{
-				$result[$key] = implode(" ", array_unique(explode(" ", $value)));
-			}
-		}
-		return $result;
+		$this->setDateRange($task);
+		
+		return $this;
 	}
 	
-	
-	private function _attributes_to_html($attributes)
-	{		
-		$html = "";
-		foreach($attributes AS $attribute => $value)
-		{
-			$html .= $attribute . '="' . $value . '" ';
-		}
-		return trim($html);
+	public function getTasks()
+	{
+		$this->sortByTitle($this->tasks);
+		return $this->tasks;
 	}
+}
 
+
+/* 
+ * EZGantt
+ *
+ * - the main class
+ * - generates the project plan html
+ *
+ */	
+class EZGantt extends EZGanttBaseObject
+{
+	private $milestones = array();
+	
+	
+	/* public methods */	
+	
+	public function addMilestone($title, $start_date = NULL, $end_date = NULL, $link = NULL, $completed = FALSE)
+	{
+		$milestone = new EZGanttEventObject($title, $start_date, $end_date);
+		$milestone->setLink($link)->isCompleted($completed);
+		array_push($this->milestones, $milestone);
+		
+		$this->setDateRange($milestone);
+		
+		return $milestone;
+	}
+	
+	public function getMilestones()
+	{
+		$this->sortByTitle($this->milestones);
+		return $this->milestones;
+	}
 	
 	public function render()
 	{
 		$html = '';
-		
-		usort($this->events, array("self", "_sortByCategory"));
-		
-        foreach($this->events as $event_category){
-            $html .= '<div class="ezgantt_milestone">';
-            $html .= '<h3>' . $event_category['title'] . '</h3>';
-            $html .= $this->_renderWeeks();
-            foreach($event_category['items'] as $item){
-                $html .= $this->_addEventLine($item['name'], $item['link'], $item['start'], $item['duration'], $item['completed']);
-            }
-            $html .= '</div>';
-        }
+
+		# adjust project plan date range to minimum / maximum date of all tasks
+		# (only needed if a task date isn't within the range of its parent milestone)
+		foreach($this->getMilestones() AS $milestone)
+		{
+			foreach($milestone->getTasks() AS $task)
+			{
+				$this->setDateRange($task);
+			}
+		}
+
+    foreach($this->getMilestones() AS $milestone)
+    {
+    	$html .= $this->_renderMilestone($milestone);
+    }
 		
 		$this->_layout($html);
 		return $html;
 	}
 	
-	private function _layout(&$html){
+	
+	/* private methods */
+	
+	private function _layout(&$html)
+	{
 		$html = '<div class="ezgantt" id="ezgantt_' . $this->getSafeTitle() . '"><h2>' . $this->getTitle() . '</h2>' . $html . '</div>';		
 	}
 	
-	private function _renderWeeks()
-	{		
-		$html = '<div class="ezgantt_weeks"><table><tr>';
-		
-		for($i = 0, $week = $this->getFirstWeek(); $i < $this->getDurationInWeeks(); $week++, $i++)
+	private function _renderMilestone($milestone)
+	{
+	  $status	= $milestone->isCompleted() === TRUE ? 'completed' : ($milestone->getStartDate() > time() ? 'open' : 'active');
+		$html  = '<div class="ezgantt_milestone ' . $status . '">';
+		$html .= '<h3><a href="' . $milestone->getLink() . '">' . $milestone->getTitle() . '</a></h3>';
+		$html .= $this->_renderWeeks($milestone);
+		foreach($milestone->getTasks() AS $task)
 		{
-			$html .= '<td class="week week_'.$week.'">KW '.$week.'</td>';
-		
-			$week = $week === 52 ? 0 : $week;
+			$html .= $this->_renderTask($task);
 		}
-		$html .= '</tr></table></div>';
+		$html .= '</div>';
 		
 		return $html;
 	}
 	
-	private function _addEventLine($title, $link, $start, $duration, $completed){
-    $margin 		= number_format((floor(($this->_calcDurationInDays($this->getStartDate(), $start) / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
-	  $width 			= number_format((floor(($duration / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
-	  
-	  $status							= $completed === TRUE ? 'completed' : ($start > time() ? 'open' : 'active');
-	  $merged_attributes 	= $this->_merge_html_attributes(array('class' => 'ezgantt_row'), array('class' => $status));
-	  $html_attributes 		= $this->_attributes_to_html($merged_attributes);
+	private function _renderWeeks($milestone)
+	{		
+		$html = '<div class="ezgantt_weeks"><table><tr>';
+		for($i = 0, $week = $this->getFirstWeek(); $i < $this->getDurationInWeeks(); $week++, $i++)
+		{
+			$weekStartDate	= $this->getFirstDayOfWeek($this->getStartDate() + (60 * 60 * 24 * 7) * $i);
+			$weekEndDate		= $this->getLastDayOfWeek($weekStartDate);
 
-	  $html 			= '<div ' . $html_attributes . '><div class="sidebar_title"><a href="' . $link . '" title="' . $title . '">' . $title . '</a></div><div class="event_wrapper"><a href="' . $link . '" title="' . $title . '" class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;"></a></div></div>';
+			$status = $this->getFirstDayOfWeek($milestone->getStartDate()) <= $weekStartDate && $this->getLastDayOfWeek($milestone->getEndDate()) >= $weekEndDate ? 'active' : '';
+
+			$html	 .= '<td class="week week_'.$week.' '.$status.'">KW '.$week.'</td>';			
+			$week		= $week === 52 ? 0 : $week;
+		}
+		$html .= '</tr></table></div>';
+
+		return $html;
+	}
+	
+	private function _renderTask($task)
+	{
+    $margin 		= number_format((floor(($this->calcDurationInDays($this->getStartDate(), $task->getStartDate()) / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
+	  $width 			= number_format((floor(($task->getDurationInDays() / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');
+	  
+	  $status			= $task->isCompleted() === TRUE ? 'completed' : ($task->getStartDate() > time() ? 'open' : 'active');
+
+	  $html 			= '<div class="ezgantt_row ' . $status . '"><div class="sidebar_title"><a href="' . $task->getLink() . '" title="' . $task->getTitle() . '">' . $task->getTitle() . '</a></div><div class="event_wrapper"><a href="' . $task->getLink() . '" title="' . $task->getTitle() . '" class="event" style="margin-left:' . $margin . '%; width:' . $width . '%;"></a></div></div>';
 	  return $html;
 	}
 }
