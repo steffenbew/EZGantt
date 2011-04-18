@@ -332,7 +332,7 @@ class EZGantt extends EZGanttBaseObject
 		{
 			return number_format((floor(($this->calcDurationInDays($this->getStartDate(), time()) / $this->getDurationInDays()) * 100 * 100) / 100), 2, '.', '');		
 		}
-		return FALSE;
+		return -1;
 	}
 	
 	
