@@ -11,7 +11,7 @@ $milestone1->addTask('Test6', '2011-05-02', '2011-05-06', 'http://steffenbew.com
 $milestone1->addTask('Test9', '2011-03-03', '2011-04-17', 'http://steffenbew.com');
 $milestone1->addTask('Test14', '2011-03-03', '2011-03-17', 'http://steffenbew.com');
 
-$milestone2 = $ezgantt->addMilestone('Category 2 - what should be achieved next', '2011-01-14', '2011-06-16');
+$milestone2 = $ezgantt->addMilestone('Category 2 - what should be achieved next', '2011-01-14', '2011-06-10');
 $milestone2->addTask('Test5', '2011-05-15', '2011-06-14', 'http://steffenbew.com');
 $milestone2->addTask('Test10', '2011-01-15', '2011-03-19', 'http://steffenbew.com', TRUE);
 $milestone2->addTask('Test11', '2011-05-02', '2011-05-06', 'http://steffenbew.com');

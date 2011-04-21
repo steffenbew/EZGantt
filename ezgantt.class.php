@@ -8,7 +8,7 @@
  */	
 class EZGanttBaseObject
 {
-	protected $title, $start_date, $end_date, $safeTitle, $duration, $dateIsDynamic = false;
+	protected $title, $start_date, $end_date, $safeTitle, $duration, $dateIsDynamic = false, $baseObject;
 	
 	function __construct($title, $start_date = NULL, $end_date = NULL)
 	{
@@ -164,6 +164,17 @@ class EZGanttBaseObject
 		}
 	}
 	
+	protected function setBase(&$object)
+	{
+		$this->baseObject = $object;
+		return $this;
+	}
+	
+	protected function getBase()
+	{
+		return $this->baseObject;
+	}
+	
 	
 	/* private methods */
 	
@@ -245,13 +256,17 @@ class EZGanttEventObject extends EZGanttBaseObject
 	public function addTask($title, $start_date, $end_date, $link, $completed = FALSE)
 	{
 		$task = new EZGanttEventObject($title, $start_date, $end_date);
-		$task->setLink($link)->isCompleted($completed);
+		$task->setLink($link)->isCompleted($completed)->setBase($this->getBase());
 		array_push($this->tasks, $task);
 		
 		# dynamically set start and end date if no static date range was set
 		if($this->dateIsDynamic() === TRUE)
 		{
 			$this->setDateRange($task);
+		}
+		if($this->getBase()->dateIsDynamic() === TRUE)
+		{
+			$this->getBase()->setDateRange($task);
 		}
 		
 		return $this;
@@ -262,6 +277,7 @@ class EZGanttEventObject extends EZGanttBaseObject
 		$this->sortByTitle($this->tasks);
 		return $this->tasks;
 	}
+
 }
 
 
@@ -282,7 +298,7 @@ class EZGantt extends EZGanttBaseObject
 	public function addMilestone($title, $start_date = NULL, $end_date = NULL, $link = NULL, $completed = FALSE)
 	{
 		$milestone = new EZGanttEventObject($title, $start_date, $end_date);
-		$milestone->setLink($link)->isCompleted($completed);
+		$milestone->setLink($link)->isCompleted($completed)->setBase($this);
 		array_push($this->milestones, $milestone);
 		
 		# dynamically set start and end date if no static date range was set
@@ -303,19 +319,6 @@ class EZGantt extends EZGanttBaseObject
 	public function render()
 	{
 		$html = '';
-
-		# adjust project plan date range to minimum / maximum date of all tasks
-		# (only needed if a task date isn't within the range of its parent milestone)
-		if($this->dateIsDynamic() === TRUE)
-		{
-			foreach($this->getMilestones() AS $milestone)
-			{
-				foreach($milestone->getTasks() AS $task)
-				{
-					$this->setDateRange($task);
-				}
-			}
-		}
 
 		foreach($this->getMilestones() AS $milestone)
 		{
